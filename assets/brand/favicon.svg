@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Red Deck">
+  <!-- Фирменная геометрия сайта: два нижних угла со скруглением.
+       Три цвета, четвёртого нет. -->
+  <rect width="64" height="64" rx="0" fill="#000000"/>
+  <path d="M14 12 H50 V34 A16 16 0 0 1 34 50 H14 Z" fill="#FF0000"/>
+</svg>

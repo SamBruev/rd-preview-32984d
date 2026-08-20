@@ -1,0 +1,874 @@
+/* =====================================================================
+   RED DECK — базовый слой
+   Источник истины: design-handoff-2026-08 (утверждённое направление 2b).
+   Три цвета, Golos Text, радиусы 0, теней нет.
+   Мобильные значения — база, десктоп добирается медиазапросами.
+   ===================================================================== */
+
+/* ---------- 1. ТОКЕНЫ ---------- */
+:root {
+  /* цвет: ровно три, остальное — прозрачности.
+     Красный сдвинут с #FF0000 на #E60000: чистый #FF0000 даёт с белым
+     ровно 4,0:1 и заваливает WCAG AA на мелком тексте и на белых
+     подписях внутри красной кнопки. #E60000 даёт 4,81:1, отличие от
+     логотипного красного на глаз не читается. */
+  --ground: #FFFFFF;
+  --ink: #000000;
+  --accent: #E60000;
+  --accent-pure: #FF0000;   /* только графика без текста: точка, линейка, подчёркивание */
+
+  --line: rgba(0, 0, 0, .14);
+  --line-mid: rgba(0, 0, 0, .25);
+  --line-strong: rgba(0, 0, 0, .35);
+  --muted: rgba(0, 0, 0, .68);
+  --muted-2: rgba(0, 0, 0, .55);
+  --unknown: rgba(0, 0, 0, .58);
+
+  --on-dark: #FFFFFF;
+  --on-dark-2: rgba(255, 255, 255, .72);
+  --on-dark-3: rgba(255, 255, 255, .55);
+  --on-dark-line: rgba(255, 255, 255, .22);
+  --on-dark-line-strong: rgba(255, 255, 255, .45);
+
+  /* фирменная геометрия: один крупный скруглённый угол на поверхность.
+     Четверть круга, Rx = Ry. Читается как радиус рампы, а не как
+     декоративное скругление. Возврат к геометрии первого хандофа —
+     направление 2b объявляло «радиусы 0», владелец это переопределил. */
+  --rd-curve: 72px;
+  /* мелкая ступень для кнопок, коробок и полей: на элементе высотой
+     48 px радиус в 14 px даёт ту же дугу, что и 72 px на фото 360 px */
+  --rd-curve-sm: 14px;
+
+  /* сетка */
+  --shell: 1440px;
+  --pad: 20px;
+  --sec-y: 44px;
+  --gap: 22px;
+
+  /* типографика */
+  --font: "Golos Text", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* четыре ступени, каждая отличается от соседней минимум в 1,25 раза —
+     на 390 px это 38 / 26 / 20 / 17, шаг видно без линейки */
+  --t-hero: clamp(38px, 9.4vw, 84px);
+  --t-h1: clamp(34px, 7.2vw, 76px);
+  --t-h2: clamp(26px, 5.4vw, 46px);
+  --t-h2s: clamp(21px, 4.4vw, 34px);
+  --t-h3: clamp(20px, 3.6vw, 28px);
+  --t-h4: clamp(17px, 2.6vw, 22px);
+  --t-lede: clamp(16px, 2.1vw, 19px);
+  --t-body: 16px;
+  --t-small: 15px;
+
+  /* движение — сдержанное, физичное */
+  --d-micro: .15s;
+  --d-quick: .22s;
+  --d-move: .32s;
+  --d-reveal: .72s;
+  --d-photo: .8s;
+
+  --e-out: cubic-bezier(.32, .72, 0, 1);   /* основная: быстрый старт, мягкая посадка */
+  --e-soft: cubic-bezier(.2, .7, .3, 1);
+  --e-inout: cubic-bezier(.4, 0, .2, 1);
+  --e-spring: cubic-bezier(.34, 1.56, .64, 1); /* пружина: лёгкий перелёт на посадке */
+
+  --tap: 48px;
+}
+
+/* на узком экране h2s и h3 упирались в свои минимумы и давали разницу
+   в один пиксель — там ступеней остаётся четыре, а не пять */
+@media (max-width: 519px) { :root { --t-h3: 18px; } }
+@media (min-width: 760px) {
+  :root { --pad: 32px; --sec-y: 64px; --gap: 32px; --rd-curve: 112px; --rd-curve-sm: 16px; }
+}
+@media (min-width: 1100px) {
+  :root { --pad: 40px; --sec-y: 72px; --gap: 40px; --rd-curve: 144px; --rd-curve-sm: 18px; }
+}
+
+/* ---------- 2. СБРОС ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: var(--t-body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, p, figure, dl, dd, ul, ol { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+img, svg, video { display: block; max-width: 100%; }
+/* авторское правило легко перебивает [hidden] из таблицы браузера — страхуемся */
+[hidden] { display: none !important; }
+button { font: inherit; color: inherit; }
+a { color: inherit; }
+
+/* фокус — видимый и одинаковый везде */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+/* main получает фокус программно при смене маршрута — кольцо здесь
+   читалось бы как красная линейка над подвалом */
+#main:focus, #main:focus-visible { outline: none; }
+.dark :focus-visible, .on-red :focus-visible {
+  outline-color: #fff;
+}
+
+.sr {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: 0; border: 0; overflow: hidden;
+  white-space: nowrap; clip-path: inset(50%);
+}
+
+.skip {
+  position: absolute; left: 8px; top: -60px; z-index: 200;
+  background: var(--ink); color: #fff; padding: 14px 18px; min-height: var(--tap);
+  display: inline-flex; align-items: center;
+  font-size: 14px; font-weight: 700; text-decoration: none;
+  transition: top var(--d-quick) var(--e-out);
+}
+.skip:focus { top: 8px; }
+
+/* ---------- 3. ТИПОГРАФИКА ---------- */
+.t-hero {
+  font-size: var(--t-hero); font-weight: 400; line-height: .95;
+  letter-spacing: -.04em; text-wrap: balance;
+}
+.t-h1 { font-size: var(--t-h1); font-weight: 400; line-height: .99; letter-spacing: -.035em; }
+.t-h2 { font-size: var(--t-h2); font-weight: 400; line-height: 1.04; letter-spacing: -.03em; text-wrap: balance; }
+.t-h2s { font-size: var(--t-h2s); font-weight: 400; line-height: 1.06; letter-spacing: -.028em; text-wrap: balance; }
+.t-h3 { font-size: var(--t-h3); font-weight: 400; line-height: 1.08; letter-spacing: -.024em; text-wrap: balance; }
+.t-h4 { font-size: var(--t-h4); font-weight: 400; line-height: 1.12; letter-spacing: -.02em; }
+/* balance годится заголовкам в две-три строки, абзацам нужен pretty:
+   он борется именно с последней строкой в одно слово. */
+.t-lede { font-size: var(--t-lede); line-height: 1.55; color: var(--muted); max-width: 54ch; text-wrap: pretty; }
+.t-body { font-size: var(--t-body); line-height: 1.6; text-wrap: pretty; }
+.t-small { font-size: var(--t-small); line-height: 1.55; text-wrap: pretty; }
+.t-muted { color: var(--muted); }
+
+.kick {
+  font-size: 12px; font-weight: 600; line-height: 1;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 18px;
+  display: flex; align-items: center; gap: 10px;
+}
+.kick--plain { display: block; }
+/* кикер из нескольких пунктов: каждый пункт неразрывен, перенос идёт
+   только между пунктами — «свободное / катание» не разрывается */
+.kick--wrap { flex-wrap: wrap; row-gap: 8px; line-height: 1.5; }
+.kick__w { white-space: nowrap; }
+.kick__dot { color: rgba(255, 255, 255, .55); }
+.kick i {
+  font-style: normal; width: 8px; height: 8px;
+  background: var(--accent-pure); flex: none;
+}
+/* на чёрном красный текст даёт 4,36:1 — ниже нормы, поэтому там кикер
+   белый, а красным остаётся только квадрат-маркер */
+.dark .kick, .ftr .kick { color: #fff; }
+/* Служебные надзаголовки подвала и нумерация меню были набраны чистым
+   #FF0000 — цветом, который система отдала графике без текста.
+   Решение уже принято для .kick на тёмном: текст белый, красным
+   остаётся только квадрат-маркер. Применяем то же правило. */
+.ftr__h { color: var(--on-dark-2); }
+.menu__list i { color: var(--on-dark-3); }
+.dark .kick--plain, .ftr .kick--plain { display: flex; align-items: center; gap: 10px; }
+.dark .kick--plain::before, .ftr .kick--plain::before {
+  content: ""; flex: none; width: 8px; height: 8px; background: var(--accent-pure);
+}
+
+.mono {
+  font-family: var(--mono); font-size: 11px; font-weight: 400;
+  line-height: 1.45; letter-spacing: .02em; color: var(--muted-2);
+}
+.dark .mono, .ftr .mono, .menu .mono { color: var(--on-dark-3); }
+.ftr .unk, .ftr .li, .ftr .rw { border-color: var(--on-dark-line); color: inherit; }
+
+.red { color: var(--accent); font-style: normal; }
+
+/* ---------- 4. КАРКАС ---------- */
+.shell { max-width: var(--shell); margin-inline: auto; padding-inline: var(--pad); }
+.sec { padding-block: var(--sec-y); }
+.sec--line { border-top: 1px solid var(--line); }
+
+.dark { background: var(--ink); color: var(--on-dark); }
+.dark .t-lede, .dark .t-muted { color: var(--on-dark-2); }
+.dark .line, .dark .li { border-color: var(--on-dark-line); }
+
+.on-red { background: var(--accent); color: #fff; }
+
+/* ---------- 5. КНОПКИ ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 10px; min-height: var(--tap); padding: 14px 22px;
+  font-size: 15px; font-weight: 700; line-height: 1;
+  text-decoration: none; text-align: center;
+  /* Скругления — оба нижних угла. Решение владельца 19.08.2026: диагональ
+     (сверху слева и снизу справа) уводила взгляд по косой, кнопка читалась
+     наклонённой. Два нижних угла держат её ровно на строке. */
+  border: 0; border-radius: 0 0 var(--rd-curve-sm) var(--rd-curve-sm);
+  cursor: pointer;
+  transition: background var(--d-micro) linear,
+              color var(--d-micro) linear,
+              border-color var(--d-micro) linear,
+              transform var(--d-micro) var(--e-out);
+}
+.btn:active { transform: scale(.985); }
+
+.btn--primary { background: var(--accent); color: #fff; }
+.btn--primary:hover { background: var(--ink); color: #fff; }
+
+.btn--ink { background: var(--ink); color: #fff; }
+.btn--ink:hover { background: var(--accent); }
+
+.btn--ghost { background: transparent; color: var(--ink); border: 1px solid var(--line-strong); }
+.btn--ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn--onphoto { background: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, .6); }
+.btn--onphoto:hover { background: #fff; color: var(--ink); }
+
+.dark .btn--ghost { color: #fff; border-color: var(--on-dark-line-strong); }
+.dark .btn--ghost:hover { background: #fff; color: var(--ink); border-color: #fff; }
+
+.on-red .btn--ink:hover { background: #fff; color: var(--ink); }
+
+.btn--wide { width: 100%; }
+.btn--sm { min-height: var(--tap); padding: 12px 16px; font-size: 14px; }
+
+/* На телефоне кнопки в ряду складывались по ширине текста: три телефона
+   под другом давали 250 / 236 / 210 px, а «Записаться» оказывалась уже
+   второстепенного «Маршрута на Яндекс.Картах». Ниже 560 px каждая кнопка
+   в гибком ряду занимает всю строку; порядок в разметке — первичная
+   первой. Нижняя панель и подвал меню исключены: там две кнопки в ряд
+   задуманы и работают. */
+@media (max-width: 559px) {
+  .btn { flex: 1 1 100%; }
+  /* Шапка, нижняя панель и подвал меню — свои раскладки: там кнопки
+     стоят в ряд намеренно. В шапке растяжение вдобавок съедало бургер
+     до 23 px по ширине. */
+  .hdr__right .btn { flex: 0 0 auto; }
+  .bookbar .btn, .menu__foot .btn { flex: 1; }
+  .bookbar .btn--ghost { flex: 0 0 auto; }
+}
+
+/* текстовая ссылка «Подробнее →» */
+.lnk {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: 0; border: 0; padding: 8px 0; min-height: var(--tap);
+  font-size: 15px; font-weight: 700; color: var(--accent);
+  cursor: pointer; text-decoration: none;
+}
+.lnk span { transition: transform var(--d-quick) var(--e-out); }
+.lnk:hover span { transform: translateX(4px); }
+.dark .lnk { color: #fff; }
+.dark .lnk:hover { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
+
+/* ---------- 6. СТРОКИ И СПИСКИ ---------- */
+.rw {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline;
+  gap: 6px 20px; border-top: 1px solid var(--line);
+  padding: 15px 0; font-size: var(--t-body);
+}
+.rw > * { min-width: 0; }
+.rw b { font-weight: 600; white-space: nowrap; text-align: right; }
+/* значение с плашкой «уточняется» длиннее числа — ему разрешено переноситься */
+.rw b:has(.tbd) { white-space: normal; }
+/* телефон в строке — полноценная цель для пальца */
+.rw a[href^="tel:"] { display: inline-block; padding-block: 10px; margin-block: -10px; }
+.rw--last { border-bottom: 1px solid var(--line); }
+.dark .rw { border-top-color: var(--on-dark-line); }
+.dark .rw--last { border-bottom-color: var(--on-dark-line); }
+
+/* На узком экране строка вела себя через раз: короткий ярлык оставлял
+   значение справа, длинный переносил его на вторую строку — и там
+   space-between при одном элементе прижимал его влево. В одном прайсе
+   соседние строки читались двумя разными способами. Ниже 640 px строка
+   всегда одна и та же: ярлык сверху, значение под ним слева. */
+@media (max-width: 639px) {
+  .rw { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .rw b { text-align: left; white-space: normal; }
+}
+
+.li {
+  border-top: 1px solid var(--line);
+  padding: 15px 0; font-size: var(--t-body); line-height: 1.5;
+}
+.li b { font-weight: 600; }
+.li--last { border-bottom: 1px solid var(--line); }
+.dark .li { border-top-color: var(--on-dark-line); }
+.dark .li--last { border-bottom-color: var(--on-dark-line); }
+
+.rw__k { color: var(--muted-2); }
+.dark .rw__k, .ftr .rw__k { color: var(--on-dark-3); }
+.unk { color: var(--unknown); }
+.dark .unk { color: rgba(255, 255, 255, .58); }
+
+/* пометка «уточняется» */
+.tbd {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--unknown);
+  border: 1px solid var(--line); padding: 3px 6px; vertical-align: middle;
+  margin-left: 8px; white-space: nowrap;
+}
+.dark .tbd { color: rgba(255, 255, 255, .6); border-color: var(--on-dark-line); }
+
+/* ---------- 7. ТАБЛИЦЫ ---------- */
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl th {
+  font-size: 12px; font-weight: 600; line-height: 1.2;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2);
+  text-align: left; padding: 0 12px 12px 0; border-bottom: 2px solid var(--ink);
+  white-space: nowrap;
+}
+.tbl td { font-size: var(--t-body); padding: 14px 12px 14px 0; border-top: 1px solid var(--line); }
+.tbl th:last-child, .tbl td:last-child { padding-right: 0; }
+.tbl-scroll { position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tbl-hint { display: none; }
+@media (max-width: 719px) {
+  .tbl-hint {
+    display: block; margin-bottom: 10px;
+    font-family: var(--mono); font-size: 11px; color: var(--muted-2);
+  }
+  /* правый край таблицы гаснет — видно, что она продолжается */
+  .tbl-fade { position: relative; }
+  .tbl-fade::after {
+    content: ""; position: absolute; top: 0; right: 0; bottom: 0; width: 36px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0), #fff);
+    pointer-events: none;
+  }
+}
+.tbl-scroll table { min-width: 560px; }
+
+/* ---------- 8. ФОТО ---------- */
+.ph { position: relative; overflow: hidden; background: var(--ink); }
+
+/* Базовое скругление — для поверхностей, высота которых задаётся
+   содержимым (панели игры). Радиус на элементе с рамкой не ставим —
+   на бордюре он ловит артефакты. */
+/* Только длина, никаких процентов. Процент в border-radius считается
+   по своей оси: горизонтальный радиус от ширины, вертикальный от высоты.
+   На неквадратном кадре одно процентное значение даёт эллипс — замер
+   показывал расхождение Rx и Ry до 34 %, то есть заявленная четверть
+   круга ею не была. Длина даёт Rx = Ry всегда, а если пара радиусов
+   не помещается в сторону, браузер по спецификации уменьшает все
+   радиусы на один общий множитель — окружность при этом сохраняется. */
+.curve-br { border-bottom-right-radius: var(--rd-curve); }
+.curve-bl { border-bottom-left-radius: var(--rd-curve); }
+.curve-tr { border-top-right-radius: var(--rd-curve); }
+.curve-tl { border-top-left-radius: var(--rd-curve); }
+
+/* ---------- ГЕОМЕТРИЯ ВЁРТ-РАМПЫ ----------
+   Не «скругление», а профиль перехода. Переход вёрт-рампы — дуга
+   окружности от горизонтали до вертикали, а над ней прямой вертикальный
+   участок. Классика соревновательного вёрта: радиус 3,5 м, вертикаль
+   0,61 м, полная высота 4,11 м. Отношение вертикали к радиусу 0,174,
+   отсюда полный профиль R = H / 1,174 = 85,18 % высоты.
+
+   ПОЧЕМУ ПОЛОВИНА ПРОФИЛЯ. До 19.08.2026 угол был один, и кадр нёс
+   полный профиль: 85,18 % высоты. С парой нижних углов полный профиль
+   складывается сам с собой — 47,91 + 47,91 = 95,8 % ширины, и кадр
+   становится лежачим полукуполом. Поэтому на пару берётся половина
+   профиля, 42,59 % высоты. Геометрически это и есть то, что стоит
+   в зале на Дубровке: спайн — две зеркальные дуги, сходящиеся в гребне.
+
+   Почему проценты по двум осям, а не одно значение. Процент в
+   border-radius считается по своей оси: горизонтальный от ширины,
+   вертикальный от высоты. На неквадратном кадре одно значение даёт
+   эллипс, а переход рампы — настоящая окружность. Поэтому пара
+   подобрана так, чтобы обе величины дали одну длину:
+   Rx = 42,59 / A процентов ширины, Ry = 42,59 процента высоты.
+
+     16/9   A = 1,778 → 23,95 % / 42,59 %   (пара занимает 47,9 % ширины)
+     16/10  A = 1,600 → 26,62 % / 42,59 %   (53,2 %)
+     4/5    A = 0,800 → окружность не влезает: 42,59 / 0,8 = 53,2 % на
+                        угол, пара перекрыла бы кадр. Упираемся в потолок
+                        и берём 30 % / 24 % — дуга слегка сплюснута, но
+                        на вертикальном кадре разницы не видно.
+
+   Почему не суперэллипс. Squircle мягче на глаз, но рампа гнётся по
+   окружности. Здесь сглаживание было бы не изяществом, а ошибкой.
+
+   cqh не годится: элемент с container-type не является контейнером
+   для самого себя, единица уходит к внешнему контейнеру. Проверено. */
+:root { --rd-vert: 0.174; }
+
+/* Пропорциональных исключений по кадрам больше нет — и это осознанный
+   отказ. Профиль в процентах рос вместе с кадром: на карточке парка
+   640×400 он давал дугу в 170 px с каждой стороны, между ними
+   оставалось 300 px, и кадр читался куполом, а не прямоугольником
+   с двумя углами. Токен даёт одну и ту же дугу на всех кадрах
+   страницы — 144 px на десктопе, 112 на планшете, 72 на телефоне, —
+   поэтому кадры разного размера выглядят одной серией.
+   Верхний предел в 33 % ширины остаётся страховкой для узких мест. */
+.ph img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: grayscale(1) contrast(1.06);
+  transition: transform var(--d-photo) var(--e-soft), filter var(--d-photo) var(--e-soft);
+}
+a:hover .ph img, .ph:hover img, .card:hover .ph img { transform: scale(1.04); filter: grayscale(0) contrast(1); }
+
+.cap { font-family: var(--mono); font-size: 11px; letter-spacing: .02em; color: var(--muted-2); margin-top: 12px; }
+
+/* честная заглушка вместо несуществующего фото */
+.stub {
+  display: flex; align-items: flex-end; padding: 16px;
+  border: 1px solid var(--line-mid);
+  background: repeating-linear-gradient(135deg, #f2f1f0 0 10px, #eae9e8 10px 20px);
+}
+.stub span { background: #fff; padding: 6px 10px; }
+.dark .stub {
+  border-color: rgba(255, 255, 255, .28);
+  background: repeating-linear-gradient(135deg, #141414 0 10px, #0d0d0d 10px 20px);
+}
+.dark .stub span { background: #000; }
+
+/* ---------- 9. СЕТКИ ---------- */
+.grid { display: grid; gap: var(--gap); }
+.grid > * { min-width: 0; }
+@media (min-width: 760px) {
+  .g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .g-split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 4vw, 64px); }
+  .g-lead { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(32px, 3.4vw, 48px); }
+}
+
+/* шапка внутренней страницы */
+.pt { padding-block: var(--sec-y) calc(var(--sec-y) - 16px); border-bottom: 1px solid var(--line); }
+.pt__in { display: grid; gap: 28px; }
+.pt__in > * { min-width: 0; }
+@media (min-width: 1024px) {
+  .pt__in { grid-template-columns: minmax(0, 1fr) 380px; gap: 48px; align-items: end; }
+}
+
+/* ---------- 10. ШАПКА ---------- */
+/* Шапка — «жидкое стекло»: полупрозрачная, контент под ней размыт
+   и чуть насыщен. Прозрачность не ниже .8 — текст шапки обязан
+   держать контраст на любом кадре под ней. */
+.hdr {
+  position: sticky; top: 0; z-index: 60;
+  background: rgba(255, 255, 255, .8);
+  -webkit-backdrop-filter: saturate(1.8) blur(20px);
+  backdrop-filter: saturate(1.8) blur(20px);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--d-quick) linear;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .hdr { background: rgba(255, 255, 255, .96); }
+}
+.hdr[data-stuck="1"] { border-bottom-color: var(--line); }
+.hdr__in {
+  max-width: var(--shell); margin-inline: auto; padding: 10px var(--pad);
+  display: flex; align-items: center; gap: 16px;
+}
+.hdr__logo { flex: none; display: inline-flex; align-items: center; min-height: 48px; background: 0; border: 0; padding: 4px; cursor: pointer; }
+.hdr__logo img { width: 60px; height: 40px; object-fit: contain; }
+.hdr__nav { display: none; }
+.hdr__right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.hdr__hrs { display: none; }
+
+.navlink {
+  position: relative; background: 0; border: 0; padding: 18px 0 16px;
+  font-size: 14px; font-weight: 600; line-height: 1; color: var(--ink);
+  cursor: pointer; text-decoration: none; white-space: nowrap;
+}
+.navlink::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+  background: var(--accent-pure); transform: scaleX(0); transform-origin: left;
+  transition: transform var(--d-quick) var(--e-out);
+}
+.navlink:hover { color: var(--accent); }
+.navlink[aria-current="page"]::after, .navlink:hover::after { transform: scaleX(1); }
+
+/* Переключатель языка: два флага, без коробки и без подписей RU / EN.
+   Невыбранный флаг обесцвечен — тот же приём, что и на фотографиях.
+   Побочный выигрыш: цветным одновременно бывает только один флаг,
+   и в шапку попадает три посторонних цвета вместо шести. */
+.lang { display: inline-flex; align-items: center; gap: 2px; }
+.lang button {
+  position: relative; min-width: var(--tap); min-height: var(--tap); padding: 0 6px;
+  background: 0; border: 0; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+/* Рамка и скругление — на CSS, а не внутри SVG: рамка в один пиксель
+   рисуется чётко при любом масштабе, обводка внутри вектора на 34 px
+   попадала между пикселями и мылила край. */
+/* Оба флага строго одного размера. Приглушать невыбранный нельзя:
+   у российского две полосы из трёх светлые, и на белой шапке он от
+   прозрачности почти пропадает. Оба всегда в полном цвете, состояние
+   несёт красная метка снизу. */
+.lang__c {
+  font-family: var(--mono); font-size: 12px; font-weight: 400;
+  letter-spacing: .06em; color: var(--muted-2);
+  transition: color var(--d-quick) linear;
+}
+.lang button:hover .lang__c { color: var(--ink); }
+.lang button[aria-pressed="true"] .lang__c { color: var(--ink); font-weight: 700; }
+/* цвет не может быть единственным признаком выбора — под активным
+   флагом остаётся красная линейка */
+.lang button[aria-pressed="true"]::after {
+  content: ""; position: absolute; left: 50%; transform: translateX(-50%);
+  bottom: 6px; width: 36px; height: 2px; background: var(--accent-pure);
+}
+@media (prefers-reduced-motion: reduce) {
+  .lang svg, .lang button:hover svg { transition: none; transform: none; }
+}
+/* Порядок ужимания шапки на узких экранах: сначала часы, потом размер
+   логотипа и кнопки, в самом конце — флаги (они дублируются в меню).
+   Главное действие «Записаться» остаётся до последнего. */
+@media (max-width: 639px) {
+  .hdr__book { padding-inline: 12px; font-size: 13px; }
+  .hdr__in { gap: 8px; padding-inline: var(--pad); }
+  .hdr__logo img { width: 52px; height: 35px; }
+  /* флаг не ужимаем — он и есть кнопка; сужается только поле вокруг него */
+  .lang button { min-width: 42px; }
+  .lang { gap: 0; }
+  .burger { width: 44px; }
+}
+@media (max-width: 359px) { .hdr .lang { display: none; } }
+
+/* ---------- КНОПКА МЕНЮ ----------
+   Чистый бургер без украшений — решение владельца 19.08.2026 после
+   двух заходов (детальные скейты слипались в решётку, красная рейка
+   показалась ерундой). Кнопка меню — утилита: узнаваться должна
+   мгновенно, фирменность несут логотип и красная кнопка рядом.
+   Единственная вольность — деки выкатываются лесенкой на наведении. */
+.burger {
+  position: relative;
+  width: 48px; height: 48px; background: 0; border: 1px solid var(--line-mid);
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; cursor: pointer; padding: 0;
+}
+.burger span {
+  width: 24px; height: 3px; border-radius: 1.5px; background: var(--ink);
+  transition: transform var(--d-move) var(--e-out), opacity var(--d-micro) linear;
+}
+.burger:hover span:nth-child(1) { transform: translateX(2px); }
+.burger:hover span:nth-child(2) { transform: translateX(2px); transition-delay: .04s; }
+.burger:hover span:nth-child(3) { transform: translateX(2px); transition-delay: .08s; }
+
+/* шаг между центрами полос: 3 + 6 = 9 */
+.burger[aria-expanded="true"] span:nth-child(1),
+.burger[aria-expanded="true"]:hover span:nth-child(1) { transform: translateY(9px) rotate(45deg); transition-delay: 0s; }
+.burger[aria-expanded="true"] span:nth-child(2),
+.burger[aria-expanded="true"]:hover span:nth-child(2) { opacity: 0; transform: none; transition-delay: 0s; }
+.burger[aria-expanded="true"] span:nth-child(3),
+.burger[aria-expanded="true"]:hover span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); transition-delay: 0s; }
+
+@media (min-width: 1100px) {
+  .hdr__in { padding-block: 12px; gap: 26px; }
+  .hdr__logo img { width: 76px; height: 51px; }
+  .hdr__nav { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; }
+  .hdr__hrs { display: inline-flex; align-items: center; gap: 10px; }
+  /* Разделитель точкой — чтобы часы и номер не слипались в одну строку
+     и чтобы номер читался как отдельная цель, а не как хвост часов. */
+  .hdr__hrs .hdr__tel::before { content: "·"; margin-right: 10px; color: var(--line-strong); }
+  .hdr__tel {
+    color: var(--ink); text-decoration: none; font-weight: 600;
+    display: inline-flex; align-items: center; min-height: var(--tap);
+  }
+  .hdr__tel:hover { color: var(--accent); }
+  .burger { display: none; }
+}
+
+/* выдвижное меню */
+.menu .btn--ghost { color: #fff; border-color: var(--on-dark-line-strong); }
+.menu .btn--ghost:hover { background: #fff; color: var(--ink); border-color: #fff; }
+.menu {
+  position: fixed; inset: 0; z-index: 90;
+  /* тёмное стекло: страница просвечивает размытой, меню ощущается
+     слоем над сайтом, а не отдельным экраном */
+  background: rgba(0, 0, 0, .68); color: #fff;
+  -webkit-backdrop-filter: saturate(1.4) blur(26px);
+  backdrop-filter: saturate(1.4) blur(26px);
+  display: grid; grid-template-rows: auto 1fr auto;
+  opacity: 0; visibility: hidden;
+  transition: opacity var(--d-move) var(--e-out), visibility 0s linear var(--d-move);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .menu { background: var(--ink); }
+}
+.menu[data-open="1"] { opacity: 1; visibility: visible; transition-delay: 0s; }
+/* gap, а не только space-between: кнопка «Закрыть» тянулась флексом
+   на всю оставшуюся ширину и упиралась в подпись «Меню» вплотную. */
+.menu__top { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 14px var(--pad); border-bottom: 1px solid var(--on-dark-line); }
+.menu__top .btn { flex: 0 0 auto; }
+.menu__list { padding: 8px var(--pad); overflow-y: auto; }
+.menu__list a {
+  display: flex; align-items: baseline; gap: 14px;
+  padding: 10px 0; min-height: 48px; border-bottom: 1px solid var(--on-dark-line);
+  font-size: clamp(19px, 5vw, 24px); font-weight: 400; letter-spacing: -.02em; text-decoration: none;
+}
+.menu__list a i { font-style: normal; font-family: var(--mono); font-size: 11px; color: var(--on-dark-3); }
+/* красный текст на чёрном даёт 4,36:1 — ниже нормы.
+   Текущий пункт помечаем маркером, а не цветом. */
+.menu__list a[aria-current="page"] { color: #fff; }
+.menu__list a[aria-current="page"] i { color: var(--accent-pure); }
+.menu__list a[aria-current="page"]::after {
+  content: ""; width: 8px; height: 8px; background: var(--accent-pure);
+  align-self: center; margin-left: auto; flex: none;
+}
+.menu__foot {
+  padding: 14px var(--pad) calc(14px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--on-dark-line);
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px;
+}
+.menu__foot > .btn--wide { grid-column: 1 / -1; }
+
+/* ---------- 11. НИЖНЯЯ ПАНЕЛЬ НА ТЕЛЕФОНЕ ---------- */
+.bookbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 70;
+  display: flex; gap: 10px; padding: 10px var(--pad) calc(10px + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, .8);
+  -webkit-backdrop-filter: saturate(1.8) blur(22px); backdrop-filter: saturate(1.8) blur(22px);
+  border-top: 1px solid var(--line-mid);
+  transform: translateY(120%);
+  visibility: hidden;
+  transition: transform var(--d-move) var(--e-out), visibility 0s linear var(--d-move);
+}
+/* спрятанная панель не должна ловить табуляцию */
+.bookbar[data-on="1"] { transform: none; visibility: visible; transition-delay: 0s; }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .bookbar { background: rgba(255, 255, 255, .96); }
+}
+.bookbar .btn { flex: 1; min-height: 52px; }
+.bookbar .btn--ghost { flex: 0 0 auto; padding-inline: 18px; }
+@media (min-width: 1100px) { .bookbar { display: none; } }
+body { padding-bottom: 0; }
+@media (max-width: 1099px) { .has-bookbar { padding-bottom: calc(74px + env(safe-area-inset-bottom)); } }
+
+/* ---------- 12. ПОДВАЛ ---------- */
+.ftr { background: var(--ink); color: #fff; }
+.ftr__in { display: grid; gap: 28px; padding-block: 44px; }
+/* Логотип в подвале — белая версия прямо на чёрном.
+   Плашка #fff убрана: она была нужна только потому, что подкладывали
+   чёрный логотип. Чёрный на белом — в шапке, белый на чёрном — здесь. */
+.ftr__brand { display: inline-flex; margin-bottom: 18px; }
+.ftr__brand img { width: 78px; height: 53px; object-fit: contain; }
+.ftr__col { display: grid; gap: 2px; align-content: start; font-size: 14px; }
+.ftr__col .mono { margin-bottom: 6px; }
+/* Заголовки колонок подвала. Красный здесь именно #FF0000, а не #E60000:
+   на чёрном чистый даёт 5,25:1 и проходит норму, затемнённый — 4,36:1
+   и не проходит. Это тот же случай, что и слово «вёрт-рампа» на тёмном. */
+.ftr .mono.ftr__h {
+  color: var(--accent-pure);
+  font-size: 12px; font-weight: 600; letter-spacing: .18em;
+  margin-bottom: 12px;
+}
+.ftr__col a, .ftr__col button {
+  background: 0; border: 0; padding: 13px 0; min-height: var(--tap);
+  text-align: left; text-decoration: none; color: #fff; cursor: pointer;
+  display: inline-flex; align-items: center;
+}
+.ftr__park { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+.ftr__park .tel { flex: none; }
+.ftr__col a:hover, .ftr__col button:hover { color: var(--accent); }
+.ftr__col .tel { color: var(--on-dark-2); font-size: 13px; }
+.ftr__note { border-top: 1px solid var(--on-dark-line); }
+.ftr__note .shell { padding-block: 16px; }
+@media (min-width: 760px) { .ftr__in { grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; padding-block: 56px; } }
+
+/* ---------- 13. МЕЛОЧИ ---------- */
+.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--line); overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  position: relative; flex: none; background: 0; border: 0; cursor: pointer;
+  padding: 0 26px 16px 0; min-height: 48px;
+  font-size: clamp(20px, 4.4vw, 26px); font-weight: 400; line-height: 1;
+  letter-spacing: -.02em; color: var(--muted-2); text-align: left; white-space: nowrap;
+  transition: color var(--d-micro) linear;
+}
+.tab::after {
+  content: ""; position: absolute; left: 0; right: 26px; bottom: -1px; height: 3px;
+  background: var(--accent-pure); transform: scaleX(0); transform-origin: left;
+  transition: transform var(--d-move) var(--e-out);
+}
+.tab[aria-pressed="true"] { color: var(--ink); }
+.tab[aria-pressed="true"]::after { transform: scaleX(1); }
+.tab:hover { color: var(--ink); }
+
+.pick {
+  border-radius: 0 0 var(--rd-curve-sm) var(--rd-curve-sm);
+  position: relative; display: flex; justify-content: space-between; align-items: baseline;
+  gap: 16px; width: 100%; text-align: left;
+  padding: 16px 18px; min-height: 56px;
+  border: 1px solid var(--line-mid); background: #fff; color: var(--ink); cursor: pointer;
+  transition: border-color var(--d-micro) linear;
+}
+.pick:hover { border-color: var(--ink); }
+.pick strong { font-size: 17px; font-weight: 600; line-height: 1.2; }
+.pick em { font-style: normal; font-size: 15px; color: var(--muted-2); }
+/* Выбранный вариант — красная скоба: низ и бока, верх открыт.
+   Полная рамка показалась владельцу 20.08.2026 некрасивой; скоба
+   повторяет фирменные нижние радиусы и читается как «дно» кнопки. */
+.pick::after {
+  content: ""; position: absolute; inset: -1px; pointer-events: none;
+  border: solid var(--accent-pure); border-width: 0 3px 3px 3px;
+  border-radius: 0 0 var(--rd-curve-sm) var(--rd-curve-sm);
+  opacity: 0; transform: translateY(4px);
+  transition: opacity var(--d-quick) linear, transform var(--d-quick) var(--e-out);
+}
+.pick[aria-pressed="true"]::after { opacity: 1; transform: none; }
+
+/* ---------- СВОДКА ВЫБОРА НА ЗАПИСИ ----------
+   Три строки чипов: парк, направление, формат. Владелец 20.08.2026:
+   выбор должен меняться прямо в сводке, одним тапом. */
+.bk-ch { padding: 12px 0; }
+.bk-ch + .bk-ch { border-top: 1px solid var(--line); }
+.bk-ch--last { padding-bottom: 0; }
+.bk-ch__k {
+  display: block; margin-bottom: 8px;
+  font-family: var(--mono); font-size: 11px; font-weight: 400;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--muted-2);
+}
+.bk-ch__r { display: flex; flex-wrap: wrap; gap: 8px; }
+.bk-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: var(--tap); padding: 10px 16px;
+  border: 1px solid var(--line-mid); background: #fff; color: var(--ink);
+  font-size: 14px; font-weight: 600; line-height: 1; cursor: pointer;
+  border-radius: 0 0 var(--rd-curve-sm) var(--rd-curve-sm);
+  transition: border-color var(--d-micro) linear, background var(--d-micro) linear,
+              color var(--d-micro) linear, transform var(--d-micro) var(--e-out);
+}
+.bk-chip:hover { border-color: var(--ink); }
+.bk-chip:active { transform: scale(.96); }
+.bk-chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.box {
+  border: 1px solid var(--line-mid); padding: 22px;
+  border-radius: 0 0 var(--rd-curve-sm) var(--rd-curve-sm);
+}
+
+/* ---------- ФОРМА ЗАЯВКИ ---------- */
+.lead { display: grid; gap: 14px; }
+.fld { display: grid; gap: 6px; }
+.fld span {
+  font-family: var(--mono); font-size: 11px; font-weight: 400;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--muted-2);
+}
+/* 16px в полях обязательны: меньший кегль заставляет iOS зумить страницу при фокусе */
+.fld input, .fld select {
+  min-height: var(--tap); padding: 12px 14px; width: 100%;
+  font: inherit; font-size: 16px; color: var(--ink);
+  border: 1px solid var(--line-mid); background: #fff;
+  border-radius: 0 0 var(--rd-curve-sm) var(--rd-curve-sm);
+  transition: border-color var(--d-micro) linear;
+}
+.fld input:hover, .fld select:hover { border-color: var(--ink); }
+.fld input:focus-visible, .fld select:focus-visible { outline: 2px solid var(--accent-pure); outline-offset: 2px; }
+.dark .box { border-color: var(--on-dark-line-strong); }
+.box--accent { border-left: 3px solid var(--accent-pure); }
+
+.eyebrow-row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 26px; }
+
+/* Адрес — единственная строка, где значение длиннее ярлыка.
+   На узком экране она встаёт в две строки, иначе последнее слово
+   отрывается и висит справа в одиночку. */
+@media (max-width: 639px) {
+  .rw--addr { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .rw--addr > * { text-align: left !important; max-width: none !important; }
+}
+
+/* значение строки, которое длиннее ярлыка.
+   text-wrap:balance здесь нельзя: он ужимает строку до половины ширины
+   и адрес рвётся на две строки при свободных 600 px. */
+.rw__v { text-align: right; max-width: 46ch; }
+
+/* переключатель языка внутри тёмного меню: места больше — флаги крупнее.
+   Обводка на чёрном не нужна, белые полосы сами дают край. */
+.lang--menu { justify-self: start; gap: 10px; }
+.lang--menu button { min-width: 56px; min-height: 56px; }
+.lang--menu .lang__c { font-size: 14px; color: var(--on-dark-3); }
+.lang--menu button:hover .lang__c, .lang--menu button[aria-pressed="true"] .lang__c { color: #fff; }
+.lang--menu button[aria-pressed="true"]::after { width: 46px; bottom: 8px; }
+
+/* ---------- 14. ТРЕНЕРЫ, РЕЙТИНГ, ОТЗЫВЫ ----------
+   Карточка тренера — текстовая: фотографии есть на действующем сайте
+   клуба, но в исходном качестве лежат в кабинете Tilda. Пока их нет,
+   карточка держится на имени, категории и фактах, а не на пустой
+   серой плашке во всю колонку: заглушка размером с портрет читается
+   как недоделанный сайт, а строка фактов — нет. */
+/* Сетка на бордюрах, а не на просветах в цветной подложке: тренеров
+   восемь, колонок три, и девятая ячейка оставалась пустым серым
+   прямоугольником. Бордюры рисуют только то, что есть. */
+.coaches { display: grid; gap: 0; border-top: 1px solid var(--line); }
+.coach { border-bottom: 1px solid var(--line); padding: 24px 0 26px; }
+@media (min-width: 760px) {
+  .coaches { grid-template-columns: 1fr 1fr; }
+  .coach { padding: 26px 28px 30px; border-left: 1px solid var(--line); }
+  .coach:nth-child(2n+1) { border-left: 0; }
+}
+@media (min-width: 1100px) {
+  .coaches { grid-template-columns: repeat(3, 1fr); }
+  .coach:nth-child(2n+1) { border-left: 1px solid var(--line); }
+  .coach:nth-child(3n+1) { border-left: 0; }
+}
+/* было 4 px при разнице кеглей в 2 px — имя и должность читались
+   одним двухстрочным пятном, а не двумя ступенями */
+.coach__h { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; margin-bottom: 11px; }
+.coach__h .mono { flex: none; }
+.coach__r { margin-bottom: 14px; font-family: var(--mono); font-size: 11px;
+  letter-spacing: .02em; color: var(--muted-2); }
+/* красная линейка под именем — та же графическая роль, что у рейки
+   в кнопке меню и у маркера кикера */
+.coach__h::after { content: none; }
+.coach { position: relative; }
+.coach::before {
+  content: ""; position: absolute; left: 0; top: 0;
+  width: 26px; height: 3px; background: var(--accent-pure);
+  opacity: 0; transition: opacity var(--d-quick) linear;
+}
+@media (min-width: 760px) { .coach::before { left: 28px; } }
+.coach:hover::before { opacity: 1; }
+
+/* оценка — крупная цифра в одну строку с заголовком секции */
+.g-lead > .box { align-self: start; }
+.rate { font-size: var(--t-h2s); line-height: 1; letter-spacing: -.028em; white-space: nowrap; }
+.rate__m { color: var(--muted-2); }
+
+.revs { display: grid; gap: var(--gap); }
+@media (min-width: 760px) { .revs { grid-template-columns: 1fr 1fr; } }
+.rev { margin: 0; padding-left: 16px; border-left: 2px solid var(--accent-pure); }
+.rev blockquote { margin: 0 0 10px; max-width: 46ch; }
+
+/* каналы клуба в подвале — рядом с описанием, а не отдельной колонкой:
+   это не раздел навигации, а подпись «мы живые» */
+.ftr__soc { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 18px; }
+.ftr__soc a {
+  color: var(--on-dark-2); text-decoration: none; font-size: var(--t-small);
+  display: inline-flex; align-items: center; min-height: var(--tap);
+}
+.ftr__soc a:hover { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
+
+
+/* Строка принятия оферты под кнопками записи. Мелко, но читаемо;
+   ссылки подчёркнуты — это юридический текст, а не украшение. */
+.legal-note {
+  margin-top: 12px; max-width: 52ch;
+  font-size: 12px; line-height: 1.5; color: var(--muted-2);
+}
+/* Цель для пальца растёт паддингом с обратным отступом — строка
+   визуально не меняется, но тап ловится на 48 px по высоте. Тот же
+   приём, что у телефонов в строках .rw. */
+.legal-note a {
+  color: inherit; text-underline-offset: 2px;
+  display: inline-block; padding-block: 17px; margin-block: -17px;
+}
+.legal-note a:hover { color: var(--ink); }
+.dark .legal-note, .intake--photo .legal-note { color: var(--on-dark-3); }
+.dark .legal-note a:hover, .intake--photo .legal-note a:hover { color: #fff; }
+
+/* портрет тренера в карточке */
+.coach__ph { aspect-ratio: 1 / 1; margin-bottom: 16px; }

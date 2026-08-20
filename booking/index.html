@@ -1,0 +1,177 @@
+<!DOCTYPE html><html lang="ru" style=""><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Запись — Red Deck</title>
+<meta name="description" content="Секция — по звонку: группы набираются потоками, и администратор подберёт время под ваш график. Персональную тренировку и свободное катание можно забронировать онлайн — услугу, тренера и время вы выбираете в системе записи.">
+<!-- ЧЕРНОВИК. Перед публикацией строку ниже удалить, иначе сайта не будет
+     ни в Яндексе, ни в Google. -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="/rd-preview-32984d/assets/brand/favicon.svg" type="image/svg+xml">
+
+<!-- Карточка при пересылке ссылки в мессенджер. og:url и og:image требуют
+     абсолютных адресов — их можно проставить только после того, как будет
+     известен домен. До этого ссылка разворачивается заголовком и описанием,
+     без картинки. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Red Deck">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:title" content="Запись — Red Deck">
+<meta property="og:description" content="Секция — по звонку: группы набираются потоками, и администратор подберёт время под ваш график. Персональную тренировку и свободное катание можно забронировать онлайн — услугу, тренера и время вы выбираете в системе записи.">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400..900&amp;display=swap">
+
+<!-- первый экран — он же LCP: кадр начинает грузиться до разбора скриптов -->
+<link rel="preload" as="image" media="(max-width: 759px)" href="/rd-preview-32984d/assets/photo/sokolniki-mobile-9x16.webp" fetchpriority="high">
+<link rel="preload" as="image" media="(min-width: 760px)" href="/rd-preview-32984d/assets/photo/sokolniki-hall-16x9.webp" fetchpriority="high">
+
+<link rel="stylesheet" href="/rd-preview-32984d/src/base.css">
+<link rel="stylesheet" href="/rd-preview-32984d/src/motion.css">
+<link rel="stylesheet" href="/rd-preview-32984d/src/home.css">
+<link rel="stylesheet" href="/rd-preview-32984d/src/parks/parks.css">
+<link rel="stylesheet" href="/rd-preview-32984d/src/game.css">
+
+<!-- Три площадки для поисковых карточек и карт. Данные повторяют content.js;
+     при правке адресов и телефонов там — поправить и здесь.
+     Телефоны Химок и Дубровки внутри проекта помечены как непроверенные:
+     прозвонить до публикации. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "#org",
+      "name": "Red Deck",
+      "legalName": "ООО «РЕД ДЕК 3.0»",
+      "description": "Сеть крытых скейт-парков Москвы"
+    },
+    {
+      "@type": "SportsActivityLocation",
+      "@id": "#sokolniki",
+      "name": "Red Deck Сокольники",
+      "parentOrganization": { "@id": "#org" },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Сокольнический Вал, д. 1, стр. 1",
+        "addressLocality": "Москва",
+        "addressCountry": "RU"
+      },
+      "geo": { "@type": "GeoCoordinates", "latitude": 55.805766, "longitude": 37.672904 },
+      "telephone": "+7 (929) 509-17-27",
+      "openingHours": "Mo-Su 10:00-22:00",
+      "priceRange": "1200-9900 ₽",
+      "sameAs": "https://yandex.ru/maps/org/red_deck/83499359477/"
+    },
+    {
+      "@type": "SportsActivityLocation",
+      "@id": "#dubrovka",
+      "name": "Red Deck Дубровка",
+      "parentOrganization": { "@id": "#org" },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "7-я Кожуховская ул., 9, ТРЦ «Мозаика»",
+        "addressLocality": "Москва",
+        "addressCountry": "RU"
+      },
+      "telephone": "+7 (925) 908-43-21",
+      "openingHours": "Mo-Su 10:00-22:00",
+      "priceRange": "1000-10500 ₽"
+    },
+    {
+      "@type": "SportsActivityLocation",
+      "@id": "#khimki",
+      "name": "Red Deck Химки",
+      "parentOrganization": { "@id": "#org" },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Правобережная ул., 1Б, ТЦ «Капитолий», 2-й этаж",
+        "addressLocality": "Москва",
+        "postalCode": "125445",
+        "addressCountry": "RU"
+      },
+      "telephone": "+7 (916) 537-98-16",
+      "openingHours": "Mo-Su 10:00-22:00",
+      "priceRange": "1000-10500 ₽"
+    }
+  ]
+}
+</script>
+
+<!-- Счётчики действующего сайта: Яндекс.Метрика 93223004 и GTM-PRMTBMQW.
+     Номера взяты с reddeck.ru 20.08.2026 — статистика продолжится без
+     разрыва. Грузятся ТОЛЬКО на боевом домене: превью на GitHub Pages
+     и локальные сборки не должны подмешиваться в отчёты. -->
+<script>
+(function () {
+  var h = location.hostname;
+  if (h !== 'reddeck.ru' && h !== 'www.reddeck.ru') return;
+  (function (m, e, t, r, i, k, a) {
+    m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments); };
+    m[i].l = 1 * new Date();
+    k = e.createElement(t); a = e.getElementsByTagName(t)[0];
+    k.async = 1; k.src = r; a.parentNode.insertBefore(k, a);
+  })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
+  ym(93223004, 'init', { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true });
+  (function (w, d, s, l, i) {
+    w[l] = w[l] || []; w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+    var f = d.getElementsByTagName(s)[0], j = d.createElement(s);
+    j.async = true; j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + '&l=' + l;
+    f.parentNode.insertBefore(j, f);
+  })(window, document, 'script', 'dataLayer', 'GTM-PRMTBMQW');
+})();
+</script>
+<link rel="canonical" href="https://sambruev.github.io/rd-preview-32984d/booking">
+<meta property="og:url" content="https://sambruev.github.io/rd-preview-32984d/booking">
+<script>window.RD_BASE='/rd-preview-32984d';</script>
+</head>
+<body>
+
+<a class="skip" href="#main">К основному содержанию</a>
+
+<!-- живая область для скринридера живёт вне перерисовываемого поддерева -->
+<div id="say" class="sr" role="status" aria-live="polite">Запись — Red Deck</div>
+
+<div id="app"><header class="hdr" id="hdr" data-stuck="0"><div class="hdr__in"><a class="hdr__logo" href="/rd-preview-32984d/" aria-label="Red Deck — Главная"><img src="/rd-preview-32984d/assets/brand/reddeck-logo.png" alt="Red Deck" width="76" height="51"></a><nav class="hdr__nav" aria-label="Меню"><a class="navlink" href="/rd-preview-32984d/sekciya">Секция</a><a class="navlink" href="/rd-preview-32984d/personal">Персональные</a><a class="navlink" href="/rd-preview-32984d/free-ride">Катание</a><a class="navlink" href="/rd-preview-32984d/parks">Парки</a><a class="navlink" href="/rd-preview-32984d/prices">Цены</a><a class="navlink" href="/rd-preview-32984d/safety">Безопасность</a></nav><div class="hdr__right"><span class="mono hdr__hrs">ежедневно 10:00–22:00<a class="hdr__tel" href="tel:+79295091727">+7 (929) 509-17-27</a></span><div class="lang" role="group" aria-label="Язык"><button type="button" data-lang="ru" aria-pressed="true" title="Русский"><span class="lang__c" aria-hidden="true">RU</span><span class="sr">Русский</span></button><button type="button" data-lang="en" aria-pressed="false" title="English"><span class="lang__c" aria-hidden="true">EN</span><span class="sr">English</span></button></div><a class="btn btn--ink btn--sm hdr__book" href="/rd-preview-32984d/booking">Записаться</a><button class="burger" type="button" id="burger" aria-expanded="false" aria-controls="menu" aria-label="Меню"><span></span><span></span><span></span></button></div></div></header><main id="main" class="page-in" tabindex="-1"><section class="pt"><div class="shell pt__in"><div><p class="kick kick--plain">Запись</p><h1 class="t-h1 rv is-in" style="max-width:20ch;margin-bottom:18px">Как записаться</h1><p class="t-lede">Секция — по звонку: группы набираются потоками, и администратор подберёт время под ваш график. Персональную тренировку и свободное катание можно забронировать онлайн — услугу, тренера и время вы выбираете в системе записи.</p></div><div><div class="box" id="bk-choice"><p class="mono" style="margin-bottom:14px">Ваш выбор — меняется в один тап</p><div class="bk-ch"><span class="bk-ch__k">Парк</span><div class="bk-ch__r"><button class="bk-chip" type="button" data-park="sokolniki" aria-pressed="true">Сокольники</button><button class="bk-chip" type="button" data-park="mosaic" aria-pressed="false">Дубровка</button><button class="bk-chip" type="button" data-park="khimki" aria-pressed="false">Химки</button></div></div><div class="bk-ch"><span class="bk-ch__k">Направление</span><div class="bk-ch__r"><button class="bk-chip" type="button" data-dir="skate" aria-pressed="true">Скейтбординг</button><button class="bk-chip" type="button" data-dir="inline" aria-pressed="false">Ролики</button></div></div><div class="bk-ch bk-ch--last"><span class="bk-ch__k">Формат</span><div class="bk-ch__r"><button class="bk-chip" type="button" data-fmt="sekciya" aria-pressed="true">Секция</button><button class="bk-chip" type="button" data-fmt="personal" aria-pressed="false">Персональная тренировка</button><button class="bk-chip" type="button" data-fmt="free-ride" aria-pressed="false">Свободное катание</button></div></div></div></div></div></section><section class="sec"><div class="shell"><h2 class="t-h2 rv is-in" style="margin-bottom:30px">Выберите направление и формат</h2><div class="grid g-split"><div><p class="mono" style="margin-bottom:12px">Скейтборд или ролики</p><div class="grid g2" style="gap:12px;margin-bottom:30px"><button class="pick" type="button" data-dir="skate" aria-pressed="true"><strong>Скейтбординг</strong></button><button class="pick" type="button" data-dir="inline" aria-pressed="false"><strong>Ролики</strong></button></div><p class="mono" style="margin-bottom:12px">Формат занятия</p><div class="grid" style="gap:12px"><button class="pick" type="button" data-fmt="sekciya" aria-pressed="true"><strong>Секция</strong><em>2 200&nbsp;₽</em></button><button class="pick" type="button" data-fmt="personal" aria-pressed="false"><strong>Персональная тренировка</strong><em>от 1 400&nbsp;₽</em></button><button class="pick" type="button" data-fmt="free-ride" aria-pressed="false"><strong>Свободное катание</strong><em>от 1 200&nbsp;₽</em></button></div><div id="bk-warn" style="margin-top:20px"></div></div><div><p class="mono" style="margin-bottom:12px">Парк</p><div class="grid" id="bk-parks" style="gap:12px"><div class="box rv is-in"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:8px"><h3 class="t-h4">Сокольники</h3><span class="mono">Запись по телефону</span></div><p class="t-small t-muted" style="margin-bottom:18px">Москва, Сокольнический Вал, д. 1, стр. 1</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn--primary btn--sm" href="tel:+79295091727" data-park="sokolniki">Позвонить</a><a class="btn btn--ghost btn--sm" href="tel:+79295091727">+7 (929) 509-17-27</a></div></div><div class="box rv is-in"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:8px"><h3 class="t-h4">Дубровка</h3><span class="mono">Запись по телефону</span></div><p class="t-small t-muted" style="margin-bottom:18px">Москва, 7-я Кожуховская ул., 9, ТРЦ «Мозаика»</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn--primary btn--sm" href="tel:+79259084321" data-park="mosaic">Позвонить</a><a class="btn btn--ghost btn--sm" href="tel:+79259084321">+7 (925) 908-43-21</a></div></div><div class="box rv is-in"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:8px"><h3 class="t-h4">Химки</h3><span class="mono">Запись по телефону</span></div><p class="t-small t-muted" style="margin-bottom:18px">Правобережная ул., 1Б, ТЦ «Капитолий», 2‑й этаж</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn--primary btn--sm" href="tel:+79165379816" data-park="khimki">Позвонить</a><a class="btn btn--ghost btn--sm" href="tel:+79165379816">+7 (916) 537-98-16</a></div></div></div><p class="mono" style="margin-top:16px" id="bk-note">Секцию онлайн не записывают: группы набираются потоками, и дату ближайшего набора называет администратор. Онлайн-расписание — для персональных занятий и свободного катания.</p><p class="legal-note">Записываясь — по телефону или онлайн, — вы принимаете <a href="/rd-preview-32984d/assets/docs/oferta.pdf" target="_blank" rel="noopener">договор-оферту</a> и <a href="/rd-preview-32984d/privacy">политику обработки персональных данных</a>.</p></div></div></div></section><section class="sec sec--line" id="lead"><div class="shell grid g-split"><div><p class="kick kick--plain">Заявка</p><h2 class="t-h2s rv is-in" style="margin-bottom:14px;max-width:20ch">Неудобно звонить — оставьте заявку</h2><p class="t-body t-muted rv is-in" style="--i:1;max-width:46ch">Заявка уходит администратору выбранного парка вместе с направлением и форматом, которые вы отметили выше. Отвечают в часы работы, 10:00–22:00.</p></div><form id="lead-form" class="lead box"><label class="fld"><span>Имя</span><input name="name" type="text" autocomplete="name" maxlength="60" placeholder="Как к вам обращаться"></label><label class="fld"><span>Телефон *</span><input name="phone" type="tel" autocomplete="tel" required="" minlength="6" maxlength="20" inputmode="tel" placeholder="+7"></label><label class="fld"><span>Парк</span><select name="park"><option value="sokolniki" selected="">Сокольники</option><option value="mosaic">Дубровка</option><option value="khimki">Химки</option></select></label><label class="fld"><span>Комментарий</span><input name="note" type="text" maxlength="120" placeholder="Возраст, опыт, удобные дни — что угодно"></label><button class="btn btn--primary btn--wide" type="submit">Отправить заявку <span class="arr">→</span></button><p class="t-small t-muted" id="lead-done" hidden="">Открыли мессенджер с готовым текстом — осталось нажать «Отправить» там.</p><p class="legal-note" style="border-top:0;padding-top:0">Отправляя заявку, вы соглашаетесь с <a href="/rd-preview-32984d/privacy">политикой обработки персональных данных</a>.</p></form></div></section></main><footer class="ftr"><div class="shell ftr__in"><div><span class="ftr__brand"><img src="/rd-preview-32984d/assets/brand/reddeck-logo-white.png" alt="Red Deck" width="78" height="53" loading="lazy" decoding="async"></span><p class="t-small" style="max-width:34ch;color:var(--on-dark-2)">Сеть крытых скейт-парков Москвы. Скейтбординг и ролики, дети и взрослые. ООО «РЕД ДЕК 3.0».</p><div class="ftr__soc"><a href="https://t.me/reddeckskatepark" target="_blank" rel="noopener">Telegram</a><a href="https://vk.com/red_deck_sb" target="_blank" rel="noopener">ВКонтакте</a><a href="https://www.youtube.com/@RedDeckSkatepark" target="_blank" rel="noopener">YouTube</a></div></div><div class="ftr__col"><span class="mono ftr__h">ФОРМАТЫ</span><a href="/rd-preview-32984d/sekciya">Секция</a><a href="/rd-preview-32984d/personal">Персональные</a><a href="/rd-preview-32984d/free-ride">Катание</a><a href="/rd-preview-32984d/safety">Безопасность</a><a href="/rd-preview-32984d/gift">Сертификат</a></div><div class="ftr__col"><span class="mono ftr__h">ПАРКИ</span><span class="ftr__park"><a href="/rd-preview-32984d/parks/sokolniki">Сокольники</a><a class="tel" href="tel:+79295091727">+7 (929) 509-17-27</a></span><span class="ftr__park"><a href="/rd-preview-32984d/parks/mosaic">Дубровка</a><a class="tel" href="tel:+79259084321">+7 (925) 908-43-21</a></span><span class="ftr__park"><a href="/rd-preview-32984d/parks/khimki">Химки</a><a class="tel" href="tel:+79165379816">+7 (916) 537-98-16</a></span></div><div class="ftr__col"><span class="mono ftr__h">ДОКУМЕНТЫ</span><a href="/rd-preview-32984d/legal">Договор-оферта и правила</a><a href="/rd-preview-32984d/privacy">Политика конфиденциальности</a></div></div><div class="ftr__note"><div class="shell"><span class="mono">Цены действуют на момент публикации. Итоговую стоимость администратор подтверждает при записи.</span></div></div></footer><div class="bookbar" id="bookbar" data-on="0"><a class="btn btn--primary" href="tel:+79295091727">Позвонить</a><a class="btn btn--ghost" href="/rd-preview-32984d/booking">Записаться</a></div><div class="menu" id="menu" data-open="0" role="dialog" aria-modal="true" aria-label="Меню"><div class="menu__top"><span class="mono" style="color:rgba(255,255,255,.55)">Меню</span><button class="btn btn--ghost btn--sm" type="button" id="menu-close">Закрыть</button></div><nav class="menu__list"><a href="/rd-preview-32984d/" style="--mi:0"><i>01</i>Главная</a><a href="/rd-preview-32984d/sekciya" style="--mi:1"><i>02</i>Секция</a><a href="/rd-preview-32984d/personal" style="--mi:2"><i>03</i>Персональные</a><a href="/rd-preview-32984d/free-ride" style="--mi:3"><i>04</i>Катание</a><a href="/rd-preview-32984d/parks" style="--mi:4"><i>05</i>Парки</a><a href="/rd-preview-32984d/prices" style="--mi:5"><i>06</i>Цены</a><a href="/rd-preview-32984d/coaches" style="--mi:6"><i>07</i>Тренеры</a><a href="/rd-preview-32984d/safety" style="--mi:7"><i>08</i>Безопасность</a><a href="/rd-preview-32984d/gift" style="--mi:8"><i>09</i>Сертификат</a><a href="/rd-preview-32984d/game" style="--mi:9"><i>10</i>Игра</a><a href="/rd-preview-32984d/faq" style="--mi:10"><i>11</i>Вопросы</a><a href="/rd-preview-32984d/contacts" style="--mi:11"><i>12</i>Контакты</a></nav><div class="menu__foot"><div class="lang lang--menu" role="group" aria-label="Язык"><button type="button" data-lang="ru" aria-pressed="true" title="Русский"><span class="lang__c" aria-hidden="true">RU</span><span class="sr">Русский</span></button><button type="button" data-lang="en" aria-pressed="false" title="English"><span class="lang__c" aria-hidden="true">EN</span><span class="sr">English</span></button></div><a class="btn btn--ghost" href="tel:+79295091727">Позвонить</a><a class="btn btn--primary btn--wide" href="/rd-preview-32984d/booking">Записаться</a></div></div></div>
+
+<noscript>
+  <div style="max-width:760px;margin:0 auto;padding:48px 20px;font-family:'Golos Text',system-ui,sans-serif">
+    <h1 style="font-size:34px;font-weight:400;letter-spacing:-.03em;margin-bottom:16px">Red Deck — крытые скейт-парки</h1>
+    <p style="font-size:17px;line-height:1.55;margin-bottom:24px">
+      Сокольники, Дубровка, Химки. Секция, персональные тренировки и свободное катание.
+      Скейтборд и ролики, дети и взрослые. Ежедневно 10:00–22:00.
+    </p>
+    <p style="font-size:17px;line-height:2">
+      Сокольники, Сокольнический Вал, 1, стр. 1 — <a href="tel:+79295091727">+7 (929) 509-17-27</a><br>
+      Химки, Правобережная, 1Б, ТЦ «Капитолий» — <a href="tel:+79165379816">+7 (916) 537-98-16</a><br>
+      Дубровка, 7-я Кожуховская, 9, ТРЦ «Мозаика» — <a href="tel:+79259084321">+7 (925) 908-43-21</a>
+    </p>
+  </div>
+</noscript>
+
+<script>
+  window.RDApp_say = function (text) {
+    var el = document.getElementById('say');
+    if (!el) return;
+    el.textContent = '';
+    setTimeout(function () { el.textContent = text; }, 40);
+  };
+</script>
+
+<script src="/rd-preview-32984d/src/content.js"></script>
+<script src="/rd-preview-32984d/src/game.js"></script>
+<script src="/rd-preview-32984d/src/home.js"></script>
+<!-- базовый класс страницы парка и реестр — до самих парков -->
+<script src="/rd-preview-32984d/src/parks/park-page.js"></script>
+<!-- по модулю на парк: три чата правят их параллельно -->
+<script src="/rd-preview-32984d/src/parks/sokolniki.js"></script>
+<script src="/rd-preview-32984d/src/parks/mosaic.js"></script>
+<script src="/rd-preview-32984d/src/parks/khimki.js"></script>
+<script src="/rd-preview-32984d/src/pages.js"></script>
+<script src="/rd-preview-32984d/src/app.js"></script>
+
+
+</body></html>

@@ -1,0 +1,448 @@
+/* =====================================================================
+   RED DECK — блоки главной
+   ===================================================================== */
+
+/* ---------- ГЕРОЙ ---------- */
+.hero {
+  position: relative;
+  min-height: 78svh;
+  display: flex; align-items: flex-end;
+  background: var(--ink);
+  overflow: hidden;
+}
+@media (min-width: 760px) { .hero { min-height: 640px; } }
+/* 88svh упирали низ героя в 848 px при экране 900: ниже оставалось
+   52 px белого и ничего больше — читалось как обрез, а не как
+   приглашение листать. 76svh опускает низ на 768 и выводит на экран
+   кикер следующей секции. */
+/* 76svh давали низ героя на 764 и резали вторую строку следующего
+   заголовка ровно пополам. 72svh опускают низ на 720 и выводят
+   заголовок целиком — обрыв на полустроке хуже, чем пустая полоса. */
+@media (min-width: 1100px) { .hero { min-height: min(660px, 72svh); } }
+
+.hero__ph { position: absolute; inset: 0; }
+.hero__ph picture, .hero__ph img { width: 100%; height: 100%; }
+.hero__ph img { object-fit: cover; filter: grayscale(1) contrast(1.08); transform-origin: 60% 55%; }
+
+/* Замер показал: красное слово поверх светлого бетона давало 1,0:1.
+   Второй слой слева поднимает подложку именно там, где стоит текст,
+   и не гасит правую половину кадра. */
+.hero__veil {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, .58) 0%, rgba(0, 0, 0, .48) 44%, rgba(0, 0, 0, 0) 82%),
+    linear-gradient(180deg, rgba(0, 0, 0, .42) 0%, rgba(0, 0, 0, .62) 46%, rgba(0, 0, 0, .9) 100%);
+}
+/* на тёмном логотипный #FF0000 читается лучше затемнённого */
+.hero .red { color: var(--accent-pure); }
+
+.hero__in {
+  position: relative; width: 100%;
+  /* Верхний отступ — страховка: контент прижат к низу, и на высоком
+     окне этот паддинг не виден. Но при невысоком окне (ноутбук с
+     панелями браузера) кикер упирался прямо в шапку. */
+  padding-block: clamp(36px, 6vh, 72px) clamp(28px, 5vw, 48px);
+  color: #fff;
+}
+.hero__h { color: #fff; max-width: 16ch; margin-bottom: 18px; }
+/* Строка про 900 идёт между заголовком и лидом: заголовок называет
+   фигуру, эта строка объясняет, почему она вообще что-то значит,
+   лид дальше возвращает к ценам и аудитории. Красная линейка слева —
+   тот же маркер, что у кикеров на тёмном. */
+.hero__hawk {
+  display: flex; align-items: baseline; gap: 12px;
+  font-size: clamp(15px, 2vw, 18px); line-height: 1.45;
+  max-width: 48ch; color: #fff; margin-bottom: 16px;
+}
+.hero__hawk i {
+  flex: none; width: 22px; height: 2px; background: var(--accent-pure);
+  transform: translateY(-4px);
+}
+@media (min-width: 760px) { .hero__hawk i { width: 34px; } }
+
+.hero__lead {
+  font-size: clamp(16px, 2.2vw, 19px); line-height: 1.5;
+  max-width: 52ch; color: rgba(255, 255, 255, .86); margin-bottom: 26px;
+}
+.hero__cta { display: flex; gap: 12px; flex-wrap: wrap; }
+.hero__cta .btn { flex: 1 1 auto; min-width: 0; }
+@media (min-width: 560px) { .hero__cta .btn { flex: 0 0 auto; } }
+
+.hero__scroll {
+  display: none; align-items: center; gap: 10px;
+  margin-top: 30px; padding: 10px 0; min-height: 44px;
+  background: 0; border: 0; cursor: pointer; color: rgba(255, 255, 255, .7);
+}
+.hero__scroll .mono { color: inherit; }
+.hero__scroll i {
+  width: 1px; height: 22px; background: currentColor; display: block;
+  transform-origin: top; animation: rd-drop 2.2s var(--e-inout) infinite;
+}
+@keyframes rd-drop { 0%, 100% { transform: scaleY(.35); opacity: .5; } 45% { transform: scaleY(1); opacity: 1; } }
+.hero__scroll:hover { color: #fff; }
+@media (min-width: 1100px) { .hero__scroll { display: inline-flex; } }
+@media (prefers-reduced-motion: reduce) { .hero__scroll i { animation: none; } }
+
+/* ---------- МАСШТАБ ---------- */
+.scale__head { margin-bottom: clamp(28px, 4vw, 44px); }
+
+/* Две цифры работают линейкой вместо человека в кадре.
+   Число крупное, но не заголовочного размера: это не новая ступень
+   типографики, а акцент внутри существующей. */
+.figs {
+  display: grid; gap: 0;
+  margin-bottom: clamp(28px, 4vw, 44px);
+  border-top: 1px solid var(--line);
+}
+@media (min-width: 760px) { .figs { grid-template-columns: 1fr 1fr; gap: var(--gap); } }
+
+.fig { padding: 18px 0; border-bottom: 1px solid var(--line); }
+@media (min-width: 760px) { .fig { border-bottom: 0; padding-bottom: 4px; } }
+
+/* Было clamp(30,5.2vw,44): 44 px против заголовка своей же секции
+   в 34 px — цифра перебивала то, чему подчинена. Ступень --t-h3
+   ставит её ниже заголовка и совпадает с .acc__n: две цифровые
+   подачи на одной странице теперь одного роста. */
+.fig__n {
+  display: block; font-size: var(--t-h3); font-weight: 400;
+  line-height: 1; letter-spacing: -.035em; margin-bottom: 8px;
+}
+.fig__k { display: block; font-size: var(--t-body); margin-bottom: 4px; }
+.fig__h { display: block; max-width: 34ch; }
+
+/* Пояснение про вёрт. Отдельная врезка, а не абзац внутри описания парка:
+   первая фраза — про фигуру и про 1999 год, вторая — про нашу рампу.
+   Их нельзя сливать в один абзац, иначе исторический факт начинает
+   читаться как утверждение о нашей рампе. */
+.vert {
+  margin-bottom: clamp(28px, 4vw, 44px);
+  padding-left: 16px; border-left: 2px solid var(--accent-pure);
+}
+.vert__k { margin-bottom: 12px; }
+/* Собственная ступень между .t-h2s и .t-lede. Раньше врезка носила
+   класс .t-h2s — тот же кегль и тот же вес, что у заголовка секции
+   строкой выше: два соседних уровня иерархии переставали различаться. */
+.vert__b {
+  max-width: 26ch;
+  font-size: clamp(19px, 2.4vw, 24px);
+  font-weight: 400; line-height: 1.24; letter-spacing: -.02em;
+  text-wrap: balance;
+}
+.vert__o { max-width: 52ch; margin-top: 14px; color: var(--muted); }
+@media (min-width: 1100px) { .vert { padding-left: 22px; } }
+.scale__big { margin-bottom: var(--gap); }
+.scale__pair { }
+
+
+/* ---------- СКЕЙТ ИЛИ РОЛИКИ ---------- */
+.dirs { align-items: stretch; }
+.dir {
+  display: flex; flex-direction: column;
+  border: 1px solid var(--line); text-decoration: none; color: inherit;
+  border-radius: 0 0 var(--rd-curve-sm) var(--rd-curve-sm); overflow: hidden;
+  transition: border-color var(--d-quick) linear;
+}
+.dir:hover { border-color: var(--ink); }
+.dir__body { padding: 20px; display: flex; flex-direction: column; flex: 1; }
+.dir__body ul { margin-top: 14px; }
+.dir__body .li:last-child { border-bottom: 1px solid var(--line); }
+.dir__body .lnk { margin-top: auto; padding-top: 16px; }
+
+/* ---------- ВИДЕО ---------- */
+.vids { display: grid; gap: 16px; }
+@media (min-width: 760px) {
+  .vids { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+}
+
+/* ---------- ПРАВИЛА / ВОПРОСЫ ---------- */
+.split { display: grid; border-top: 1px solid var(--line); }
+.split__a, .split__b {
+  padding: var(--sec-y) var(--pad);
+  max-width: var(--shell); width: 100%; margin-inline: auto;
+}
+@media (min-width: 1024px) {
+  .split {
+    grid-template-columns: 1fr 1fr;
+    max-width: var(--shell); margin-inline: auto;
+  }
+  .split__a { padding-left: var(--pad); padding-right: clamp(24px, 3vw, 48px); }
+  .split__b { padding-left: clamp(24px, 3vw, 48px); padding-right: var(--pad); }
+}
+
+/* ---------- карточки форматов ---------- */
+.cards { align-items: stretch; }
+.card { display: flex; flex-direction: column; }
+.card-link { display: block; text-decoration: none; color: inherit; }
+.card__b { margin-top: 16px; }
+.card__t { margin-bottom: 8px; }
+.card__u {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px;
+  padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--line);
+}
+.card__u b { font-size: 17px; font-weight: 600; }
+.card__b p:last-child { max-width: 40ch; }
+.card__cta { margin-top: auto; padding-top: 16px; }
+/* секция — главный продукт, у неё своя кнопка и метка */
+/* слот под плашку нужен только когда карточки стоят в ряд */
+@media (min-width: 760px) {
+  /* высота .badge (29) + её margin-bottom (10). Было 33 — три карточки
+     расходились по вертикали на 6 px, и это было видно по линейкам. */
+  .card:not(.card--lead) .card__b::before { content: ""; display: block; height: 39px; }
+}
+@media (max-width: 559px) { .cards .ph { aspect-ratio: 16 / 9 !important; } }
+.badge {
+  display: inline-block; margin-bottom: 10px;
+  background: var(--accent); color: #fff;
+  border-radius: 0 0 var(--rd-curve-sm) var(--rd-curve-sm);
+  font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  padding: 6px 10px;
+}
+
+/* ---------- ГИД ПО ПАРКАМ ----------
+   Единственный интерактив на главной. Держится на той же геометрии, что
+   и остальной сайт: рамка в 1 px, четверть круга у коробки, теней нет.
+   Вариантов ответа максимум четыре — значит две колонки на телефоне
+   нечитаемы, идём одной. */
+.gd__head { margin-bottom: clamp(24px, 3.4vw, 34px); }
+
+/* Поверхность с рамкой держит мелкую ступень — ту же, что кнопки,
+   коробки и поля. Крупный угол остаётся кадрам и полосам во всю
+   ширину: на рамке он ловит артефакты и спорит с кнопкой внутри. */
+.gd__box {
+  border: 1px solid var(--line-mid);
+  padding: clamp(20px, 3vw, 32px);
+  border-radius: 0 0 var(--rd-curve-sm) var(--rd-curve-sm);
+}
+
+.gd__count { margin-bottom: 10px; }
+.gd__q { max-width: 20ch; margin-bottom: 6px; }
+.gd__crumb { margin-bottom: 18px; }
+.gd__q + .gd__opts { margin-top: 18px; }
+
+.gd__opts { display: grid; gap: 10px; }
+@media (min-width: 760px) { .gd__opts { grid-template-columns: 1fr 1fr; gap: 12px; } }
+
+.gd__opt {
+  border-radius: 0 0 var(--rd-curve-sm) var(--rd-curve-sm);
+  display: flex; flex-direction: column; gap: 4px;
+  text-align: left; width: 100%;
+  min-height: var(--tap); padding: 14px 16px;
+  background: transparent; color: inherit; cursor: pointer;
+  border: 1px solid var(--line);
+  border-radius: 0 0 var(--rd-curve-sm) var(--rd-curve-sm);
+  transition: border-color var(--d-quick) linear, background var(--d-quick) linear;
+}
+.gd__opt:hover { border-color: var(--ink); background: rgba(0, 0, 0, .03); }
+.gd__optT { font-size: var(--t-h4); line-height: 1.15; letter-spacing: -.02em; }
+/* подсказка внутри кнопки наследует цвет кнопки, поэтому приглушаем явно */
+.gd__opt .gd__optH { color: var(--muted-2); }
+
+.gd__back { margin-top: 20px; }
+.gd__again { display: flex; gap: 24px; flex-wrap: wrap; }
+.gd__back span { display: inline-block; }
+.gd__back:hover span { transform: translateX(-4px); }
+
+/* ---------- результат ---------- */
+.gd__res .rw:first-of-type { margin-top: 0; }
+.gd__note {
+  max-width: 48ch; margin-top: 14px;
+  padding-left: 14px; border-left: 2px solid var(--accent-pure);
+}
+.gd__acts { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+.gd__acts .btn { flex: 1 1 auto; }
+@media (min-width: 560px) { .gd__acts .btn { flex: 0 0 auto; } }
+
+.gd__alt {
+  margin-top: 26px; padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.gd__alt .t-small { max-width: 46ch; margin-bottom: 8px; }
+
+/* фото результата на телефоне идёт первым: смысл «вот это место»
+   доходит быстрее строки адреса */
+@media (max-width: 759px) {
+  .gd__res { display: flex; flex-direction: column; }
+  .gd__res > :last-child { order: -1; margin-bottom: 22px; }
+}
+
+/* ---------- набор и телефоны ---------- */
+.intake__phones { display: flex; flex-wrap: wrap; gap: 10px; }
+.intake__phones .btn { flex: 1 1 220px; }
+.intake .box { padding: clamp(20px, 3vw, 30px); }
+
+/* ---------- скейт или ролики ---------- */
+.dir__ph { aspect-ratio: 16 / 9; }
+@media (min-width: 560px) { .dir__ph { aspect-ratio: 21 / 9; } }
+
+/* ---------- кому что подходит ---------- */
+.auds { gap: var(--gap); }
+.aud {
+  display: flex; flex-direction: column;
+  border-top: 2px solid var(--ink); padding-top: 18px;
+}
+.aud__pain { margin: 8px 0 12px; max-width: 40ch; }
+.aud > .t-body { max-width: 44ch; }
+.aud__q { margin-top: 16px; padding: 16px; background: rgba(0, 0, 0, .04); border-left: 3px solid var(--accent-pure); }
+.aud__q .mono { margin-bottom: 8px; }
+.aud .lnk { margin-top: auto; padding-top: 14px; }
+
+/* На телефоне третий кадр галереи повторяет мысль второго и стоит 600 px.
+   На десктопе, где они лежат в ряд, оба нужны. */
+@media (max-width: 559px) {
+  .scale__pair > :last-child { display: none; }
+  .aud__q { padding: 14px; }
+  .aud { padding-top: 16px; }
+}
+
+/* ---------- ЦИФРЫ АКАДЕМИИ ----------
+   Полоса, а не карточки: четыре числа в ряд читаются как одно
+   утверждение, четыре коробки — как четыре разных. Оценка оформлена
+   ссылкой и единственная в ряду кликабельна: остальные три числа
+   проверить негде, а её — можно, и это различие должно быть видно. */
+.accs { display: grid; gap: 1px; background: var(--line); border-block: 1px solid var(--line); }
+@media (min-width: 560px)  { .accs { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1100px) { .accs { grid-template-columns: repeat(4, 1fr); } }
+
+/* Пока колонка одна, боковой паддинг ячейки складывался с полем
+   страницы: число начиналось с 40 px, а линейка под ним — с 20.
+   В многоколоночной сетке паддинг возвращается, там он держит
+   просвет между соседями. */
+.acc {
+  background: var(--ground); padding: 20px 0 22px;
+  display: block; text-decoration: none; color: inherit;
+}
+@media (min-width: 560px) {
+  .acc { padding: 22px 24px 26px; }
+  .acc:nth-child(2n+1) { padding-left: 0; }
+}
+@media (min-width: 1100px) {
+  .acc { padding-left: 24px; }
+  .acc:first-child { padding-left: 0; }
+  .acc:nth-child(2n+1) { padding-left: 24px; }
+  .acc:first-child { padding-left: 0; }
+}
+
+.acc__n {
+  display: block; font-size: var(--t-h2s); font-weight: 400;
+  line-height: 1; letter-spacing: -.04em; margin-bottom: 10px;
+}
+.acc__m { font-size: .5em; color: var(--muted-2); letter-spacing: 0; }
+.acc__k { display: block; font-size: var(--t-small); color: var(--muted); max-width: 22ch; }
+
+.acc--rate { position: relative; }
+.acc--rate::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 14px;
+  height: 2px; background: var(--accent-pure); transform: scaleX(0); transform-origin: left;
+  transition: transform var(--d-quick) var(--e-out);
+}
+@media (min-width: 560px) { .acc--rate::after { left: 24px; right: 24px; } }
+.acc--rate:hover::after { transform: scaleX(1); }
+
+/* ссылки в WhatsApp — второстепенное действие рядом с телефонами */
+.intake__wa { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px; }
+
+/* отзывы в полосе академии — уже, чем на странице тренеров:
+   здесь они опора под цифрами, а не самостоятельный раздел */
+.revs--home { margin-top: 26px; display: grid; gap: 18px; }
+@media (min-width: 1100px) { .revs--home { grid-template-columns: 1fr; } }
+
+/* ---------- ТРИ ПАРКА В ГЕРОЕ ----------
+   Именованные цели вместо обезличенной кнопки «Выбрать парк»:
+   человек с телефона попадает в свой парк одним тапом с первого
+   экрана. Рамочные, как btn--onphoto, но компактнее — три штуки
+   должны жить в одном ряду на 390 px. */
+.hero__parks { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.hero__park {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: var(--tap); padding: 10px 14px;
+  border: 1px solid rgba(255, 255, 255, .45); color: #fff;
+  /* жидкое стекло на кадре героя: чип полупрозрачен, фото под ним
+     размывается — рамочные кнопки перестают теряться на светлых кадрах */
+  background: rgba(255, 255, 255, .1);
+  -webkit-backdrop-filter: saturate(1.5) blur(14px);
+  backdrop-filter: saturate(1.5) blur(14px);
+  border-radius: 0 0 var(--rd-curve-sm) var(--rd-curve-sm);
+  font-size: 14px; font-weight: 700; text-decoration: none;
+  transition: background var(--d-micro) linear, border-color var(--d-micro) linear,
+              transform var(--d-quick) var(--e-spring);
+}
+.hero__park span { color: var(--accent-pure); }
+.hero__park:hover { background: rgba(255, 255, 255, .22); border-color: #fff; transform: translateY(-2px); }
+.hero__park:active { transform: scale(.96); }
+@media (max-width: 559px) {
+  /* чипы делят одну строку на троих и не растягиваются правилом
+     «кнопка на всю ширину» */
+  .hero__park { flex: 1 1 auto; justify-content: center; padding: 10px 8px; font-size: 13px; }
+}
+
+/* ---------- ВИДЕО НА ГЛАВНОЙ ----------
+   Кнопка играть — единственный элемент поверх кадра; ролик появляется
+   на её месте после клика и наследует скругления от .ph. */
+.vid__play {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, .18); border: 0; cursor: pointer; color: #fff;
+  transition: background var(--d-quick) linear;
+}
+.vid__play::before {
+  content: ""; position: absolute; width: 88px; height: 88px; border-radius: 50%;
+  background: var(--accent); z-index: -1;
+  transition: transform var(--d-quick) var(--e-spring);
+}
+.vid__play:hover { background: rgba(0, 0, 0, .05); }
+.vid__play:hover::before { transform: scale(1.1); }
+.vid__play:active::before { transform: scale(.94); }
+.vid__play svg { margin-left: 4px; }
+.vid__player { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #000; }
+
+/* ---------- ПАРКИ НА ТЕЛЕФОНЕ: ТРИ ФОТО-КАРТОЧКИ ----------
+   Табы скрывали два парка из трёх. Карточка — фотография во весь
+   кадр, имя поверх неё: разглядывать, а не читать. Градиент снизу
+   держит контраст белого текста на любом кадре. */
+.pkms { display: grid; gap: 16px; }
+.pkm { display: block; text-decoration: none; color: inherit; }
+.pkm__ph { position: relative; aspect-ratio: 16 / 10; }
+.pkm__ov {
+  position: absolute; inset: auto 0 0 0; z-index: 1;
+  padding: 64px 18px 18px;
+  display: flex; flex-direction: column; gap: 5px;
+  /* градиент глубже и темнее: владелец 20.08.2026 — «от первых шагов
+     до вёрта» и цены на светлых кадрах читались плохо */
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, .55) 38%, rgba(0, 0, 0, .9));
+  color: #fff;
+}
+.pkm__tag { color: #fff; font-size: 12px; text-shadow: 0 1px 6px rgba(0, 0, 0, .6); }
+.pkm__name { font-size: var(--t-h2); font-weight: 400; line-height: 1.02; letter-spacing: -.03em; text-shadow: 0 1px 8px rgba(0, 0, 0, .5); }
+.pkm__meta { font-size: 14px; color: rgba(255, 255, 255, .96); text-shadow: 0 1px 6px rgba(0, 0, 0, .6); }
+/* фирменный приём фото работает и здесь: ч/б, цвет по касанию */
+.pkm:active .pkm__ph img, .pkm:hover .pkm__ph img { filter: grayscale(0) contrast(1); transform: scale(1.04); }
+
+/* распределение вёрсток по ширинам: до 760 — карточки, после — табы */
+@media (min-width: 760px) { .pkms { display: none; } }
+@media (max-width: 759px) { .parks-wide { display: none; } }
+
+/* ---------- НАБОР В СЕКЦИЮ: ФОТО-ФОН ----------
+   Спиральная лестница из гнутой фанеры — фон полной версии блока.
+   Вуаль тёмная и глухая: здесь читают телефоны, фон не должен
+   конкурировать с ними. Ч/б — фирменный приём, без исключений. */
+.intake--photo { position: relative; overflow: hidden; }
+.intake__bg { position: absolute; inset: 0; }
+.intake__bg picture, .intake__bg img { width: 100%; height: 100%; }
+.intake__bg img { object-fit: cover; object-position: 50% 35%; filter: grayscale(1) contrast(1.06); }
+.intake__bg::after { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, .78); }
+.intake--photo > .shell { position: relative; z-index: 1; }
+.intake--photo .t-muted { color: var(--on-dark-2); }
+.intake--photo .lnk { color: #fff; }
+.intake--photo .btn--ghost { color: #fff; border-color: var(--on-dark-line-strong); }
+.intake--photo .btn--ghost:hover { background: #fff; color: var(--ink); border-color: #fff; }
+.intake--photo .box { border-color: var(--on-dark-line-strong); }
+
+/* Веил героев страниц парков — мягче главной. Парковые герои ниже
+   (56svh против 76) и их кадры тише; полная вуаль главной топила их
+   в черноте, что читалось «странной тёмной страницей». */
+.hero__veil--soft {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, .48) 0%, rgba(0, 0, 0, .36) 44%, rgba(0, 0, 0, 0) 78%),
+    linear-gradient(180deg, rgba(0, 0, 0, .30) 0%, rgba(0, 0, 0, .38) 50%, rgba(0, 0, 0, .66) 100%);
+}

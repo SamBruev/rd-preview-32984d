@@ -1,0 +1,83 @@
+/* =====================================================================
+   RED DECK — блоки страниц парков
+   Общая раскладка для всех трёх. Каждому парку доступен свой модификатор
+   .pk--sokolniki / .pk--mosaic / .pk--khimki — правит только его чат.
+   ===================================================================== */
+
+.pk__lanes, .pk__feats, .pk__calm { align-items: start; }
+
+/* Сокольники: три дорожки под три уровня */
+.pk__lane { border-top: 2px solid var(--ink); padding-top: 18px; }
+.pk__lane .t-h4 { margin-bottom: 10px; }
+.pk__lane p { max-width: 38ch; }
+
+/* Мозаика: перечень фигур, сухо и по делу */
+.pk__feat { border-top: 1px solid var(--line); padding-top: 16px; }
+.pk__feat .t-h4 { margin-bottom: 8px; }
+.pk__feat p { max-width: 40ch; }
+.pk--mosaic .pk__feat:nth-child(-n + 2) { border-top-color: var(--ink); border-top-width: 2px; }
+/* Герой Мозаики. Кадр 16:9 в широкой полосе обрезается сверху и снизу,
+   а спайн — главный аргумент страницы — лежит в нижней трети кадра.
+   По умолчанию (center) от него оставалась одна верхушка. */
+.pk--mosaic .hero__ph img { object-position: 50% 76%; }
+/* вертикальный кадр уже кадрирован по спайну — доводить нечего */
+@media (max-width: 759px) { .pk--mosaic .hero__ph img { object-position: 50% 50%; } }
+
+/* размер фигуры отдельной строкой: цифра важнее прилагательного */
+.pk--mosaic .pk__num {
+  font-family: var(--mono); font-size: clamp(16px, 2.2vw, 19px);
+  line-height: 1.25; letter-spacing: -.01em;
+  color: var(--ink); margin-bottom: 8px;
+}
+.pk--mosaic .pk__num .tbd { margin-left: 10px; }
+
+/* Химки: вопрос и ответ вместо перечня фигур */
+.pk__q { border-top: 1px solid var(--line); padding-top: 16px; }
+.pk__q-h {
+  font-size: var(--t-h4); font-weight: 400; line-height: 1.15;
+  letter-spacing: -.02em; margin-bottom: 10px;
+}
+.pk__q p:last-child { max-width: 42ch; }
+
+/* Химки: сценарий первого визита. Нумерация нужна не для красоты —
+   читатель должен видеть, что шагов конечное число и они кончаются. */
+.pk--khimki .pk__steps { display: grid; gap: 20px; }
+.pk--khimki .pk__step { border-top: 1px solid var(--line); padding-top: 14px; }
+/* номер на 11 px теряется и перестаёт работать как счётчик — 14 px */
+.pk--khimki .pk__step .mono { display: block; font-size: 14px; margin-bottom: 8px; }
+.pk--khimki .pk__step-h {
+  font-size: var(--t-h4); font-weight: 400; line-height: 1.15;
+  letter-spacing: -.02em; margin-bottom: 8px;
+}
+.pk--khimki .pk__step p:last-child { max-width: 46ch; }
+
+/* ---------- ПЕРЕКЛЮЧАТЕЛЬ ПАРКОВ ----------
+   Полоса под героем каждой страницы парка: текущий — чёрная метка,
+   два других — ссылки. Требование владельца: между парками ходят
+   напрямую, а не через главную. */
+.pk-switch { border-bottom: 1px solid var(--line); background: var(--ground); }
+.pk-switch__in {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding-block: 10px;
+}
+.pk-switch__now {
+  display: inline-flex; align-items: center;
+  min-height: 40px; padding: 8px 14px;
+  background: var(--ink); color: #fff;
+  font-size: 14px; font-weight: 700;
+  border-radius: 0 0 var(--rd-curve-sm) var(--rd-curve-sm);
+}
+.pk-switch__a {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: var(--tap); padding: 8px 14px;
+  border: 1px solid var(--line-mid); color: var(--ink);
+  font-size: 14px; font-weight: 700; text-decoration: none;
+  border-radius: 0 0 var(--rd-curve-sm) var(--rd-curve-sm);
+  transition: border-color var(--d-micro) linear, color var(--d-micro) linear;
+}
+.pk-switch__a span { color: var(--accent-pure); }
+.pk-switch__a:hover { border-color: var(--ink); }
+@media (max-width: 559px) {
+  .pk-switch__in .mono { flex-basis: 100%; }
+  .pk-switch__now, .pk-switch__a { flex: 1 1 auto; justify-content: center; padding-inline: 8px; }
+}
